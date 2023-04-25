@@ -24,5 +24,6 @@ Route::post('createUser', [UserController::class , 'create']);   // for uploadin
 Route::post('show', [UserController::class , 'index']); // for showing all User details
 
 Route::post('createPost', [TemplePostController::class , 'createPost']); 
+Route::post('showDetail', [TemplePostController::class , 'showDetail']); 
 
 

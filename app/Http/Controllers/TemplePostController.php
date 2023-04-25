@@ -66,4 +66,17 @@ class TemplePostController extends Controller
             }
         }
     }
+
+    
+    public function showDetail(Request $request){
+        
+
+        $post = TemplePost::with(['user',   
+        ])->find(2);
+
+        
+        return response()->json([
+            'data' => $post
+        ]);
+    }
 }
