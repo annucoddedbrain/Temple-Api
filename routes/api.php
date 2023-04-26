@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TemplePostController;
+use App\Http\Controllers\MetaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,5 +26,7 @@ Route::post('show', [UserController::class , 'index']); // for showing all User 
 
 Route::post('createPost', [TemplePostController::class , 'createPost']); 
 Route::post('showDetail', [TemplePostController::class , 'showDetail']); 
+
+Route::post('upload', [MetaController::class , 'upload']); 
 
 
