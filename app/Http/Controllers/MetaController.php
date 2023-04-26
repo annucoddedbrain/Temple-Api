@@ -99,7 +99,7 @@ class MetaController extends Controller
     
                 // store in db
                 $fileUpload = new Meta();
-                $fileUpload->filenames = $name;
+                $fileUpload->filenames = $path.$name;
                 $fileUpload->save();
 
                 array_push($cart,$fileUpload);
@@ -113,7 +113,7 @@ class MetaController extends Controller
                 // dd($file->toArray());
             }
         }else{
-            return response()->json(["error" => " files uploaded successfully"]);
+            return response()->json(["error"=>$validator]);
         }
 
     }
