@@ -87,7 +87,9 @@ class MetaController extends Controller
         ])->validate();
 
         if($validator){
+
             $total_files = count($request->file('files'));
+            $cart = [];
 
             foreach ($request->file('files') as $file) {
                 // rename & upload files to uploads folder
@@ -99,10 +101,16 @@ class MetaController extends Controller
                 $fileUpload = new Meta();
                 $fileUpload->filenames = $name;
                 $fileUpload->save();
+
+                array_push($cart,$fileUpload);
+
             }
-    
+            // $cart = array_count_values($file);
+            
             if($fileUpload->save()){
-                return response()->json(["success", $total_files . " files uploaded successfully"]);
+                return response()->json(["data"=>$cart]);
+
+                // dd($file->toArray());
             }
         }else{
             return response()->json(["error" => " files uploaded successfully"]);
