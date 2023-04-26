@@ -28,5 +28,6 @@ Route::post('createPost', [TemplePostController::class , 'createPost']);
 Route::post('showDetail', [TemplePostController::class , 'showDetail']); 
 
 Route::post('upload', [MetaController::class , 'upload']); 
+Route::post('createMeta', [MetaController::class , 'createMeta']); 
 
 

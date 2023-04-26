@@ -10,7 +10,12 @@ class Meta extends Model
     use HasFactory;
 
     protected $fillable = [
-        'filenames'
+        'filenames',
+        'path',
+        'size',
+        'type',
+        'temple_post_id',
+        'user_id',
     ];
 
     public function setFilenamesAttributes($value){

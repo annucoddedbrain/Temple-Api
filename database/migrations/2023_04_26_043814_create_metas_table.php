@@ -13,9 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('metas', function (Blueprint $table) {
-            $table->id();
+        Schema::create('metas', function (Blueprint $table){
+           // $table->unsignedInteger('meta_id', true)->first();
+           $table->id();
+           //$table->unsignedInteger('meta_id');
             $table->string('filenames');
+            $table->string('path');
+            $table->string('size');
+            $table->string('type');
+            // $table->foreignId('temple_post_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
