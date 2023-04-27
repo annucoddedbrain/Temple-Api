@@ -20,11 +20,10 @@ return new class extends Migration
             $table->string('location');
             $table->string('location_LatLng')->nullable();
             $table->string('time_table')->nullable();
-          
-          
-          
+
+           $table->foreignId('user_id')->constrained()->onDelete('cascade');
+
             $table->unsignedBigInteger('meta_id');
-            //$table->index('meta_id');
             // $table->foreignId('meta_id')->constrained()->onDelete('cascade');
             // $table->foreignId('meta_id')->constrained()->onDelete('cascade');
             $table->foreign('meta_id')->references('id')->on('metas')->onDelete('cascade');

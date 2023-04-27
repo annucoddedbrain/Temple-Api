@@ -14,11 +14,11 @@ class TemplePost extends Model
     protected $fillable = [
         'title',
         'description',
-        'media',
         'location',
         'location_LatLng',
         'time_table',
-        'user_id'
+        'user_id',
+        'meta_id',
     ];
 
     public function user(){

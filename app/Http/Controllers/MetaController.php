@@ -6,13 +6,14 @@ use Illuminate\Http\Request;
 use App\Models\Meta;
 use App\Models\TemplePost;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
+
 // use App\Http\Controllers\Validator;
 use Illuminate\Support\Facades\Validator;
 
 use function Symfony\Component\VarDumper\Dumper\esc;
 
-class MetaController extends Controller
-// {
+class MetaController extends Controller {
 //     public function filesUpload(Request $request){
 //         $destinationPath = 'D:\image';        
 //         $path = $request->file('avatar')->store($destinationPath);        
@@ -79,105 +80,173 @@ class MetaController extends Controller
 //         return view('upload');
 //     }
 
-//     // file upload
-//     public function upload(Request $request)
-//     {
 
 
-//         $validator = Validator::make($request->all(), [
-//             'files' => 'required|nullable',
-//             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-//         ])->validate();
-//         $extension = $request->file->extension();
-//             return response()->json($extension);
-//         if($validator){
-
-//             $total_files = count($request->file('files'));
-//             $cart = [];
-
-//             foreach ($request->file('files') as $file) {
-//                 // rename & upload files to uploads folder
-//                 $name = uniqid() . '_' . time(). '.' . $file->getClientOriginalExtension();
-//                 // $path = 'C:\Users\dev2c\OneDrive\Desktop\meta\uploads';  // physical address on PC level to   store data on deshtop 
-//                 $path = public_path() . '/uploads';    // physical address on project level to store data  
-//                 $file->move($path, $name);
-    
-//                 // store in db
-//                 $fileUpload = new Meta();
-//                 $fileUpload->filenames = $path.$name;
-//                 $fileUpload->save();
-
-//                 array_push($cart,$fileUpload);
-
-//             }
-//             // $cart = array_count_values($file);
-            
-//             if($fileUpload->save()){
-//                 return response()->json(["data"=>$cart]);
-
-//                 // dd($file->toArray());
-//             }
-//         }else{
-//             return response()->json(["error"=>$validator]);
-//         }
-
-//     }
-// }
-
+public function realFileSize($path)
 {
-    public function createMeta(Request $request){
-        // $user = User::all();
-        $user = User::first();
-        $post = TemplePost::first();
+    if (!file_exists($path))
+        return false;
+
+    $size = filesize($path);
+    
+    if (!($file = fopen($path, 'rb')))
+        return false;
+    
+    if ($size >= 0)
+    {//Check if it really is a small file (< 2 GB)
+        if (fseek($file, 0, SEEK_END) === 0)
+        {//It really is a small file
+            fclose($file);
+            return $size;
+        }
+    }
+    
+    //Quickly jump the first 2 GB with fseek. After that fseek is not working on 32 bit php (it uses int internally)
+    $size = PHP_INT_MAX - 1;
+    if (fseek($file, PHP_INT_MAX - 1) !== 0)
+    {
+        fclose($file);
+        return false;
+    }
+    
+    $length = 1024 * 1024;
+    while (!feof($file))
+    {//Read the file until end
+        $read = fread($file, $length);
+        $size = bcadd($size, $length);
+    }
+    $size = bcsub($size, $length);
+    $size = bcadd($size, strlen($read));
+    
+    fclose($file);
+    return $size;
+}
+
+// file upload
+    public function upload(Request $request)
+    {
 
 
         $validator = Validator::make($request->all(), [
-            'filenames' => 'required|string',               
-            'path' => 'required|string',
-            'size' => 'required|string',
-            'type' => 'required|string',
-        ]);
+            'files' => 'required|nullable',
+            // 'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ])->validate();
+            
+        
+        if($validator){
+
+            $total_files = count($request->file('files'));
+            $cart = [];
+
+            foreach ($request->file('files') as $file) {
+                // rename & upload files to uploads folder
+                $name = uniqid() . '_' . time(). '.' . $file->getClientOriginalExtension();
+                // $path = 'C:\Users\dev2c\OneDrive\Desktop\meta\uploads';  // physical address on PC level to   store data on deshtop 
+                $path = public_path() . '/uploads';    // physical address on project level to store data  
+                $file->move($path, $name);
+
+
+                // $size = Storage::size($file)/1024;
+                // $size = Storage::size('public/'.$picture->filename');
+                //$size = Storage::size($path.$file);
+                
+                
+
+                //dd($fileSize);
+
+                $size = "no size";
+
+                
+
+                // store in db
+                $fileUpload = Meta::create([
+                    'filenames' => $path.$name,
+                    'user_id'=> 1,
+                    'size'=>$size,
+                    'type'=>$file->getClientOriginalExtension(),
+                    'path'=>"ashdgfj"
+                ]);
+                
+                if($fileUpload->save()){
+                    array_push($cart,$fileUpload);
+                }
+
+                // $fileUpload = new Meta();
+                // $fileUpload->filenames = $path.$name;
+                // $fileUpload->save();
+
+                
+
+            }
+            // $cart = array_count_values($file);
+            
+            if($fileUpload->save()){
+                return response()->json(["data"=>$cart]);
+                // dd($file->toArray());
+            }
+        }else{
+            return response()->json(["error"=>$validator]);
+        }
+
+    }
+    public function get_size($file_path)
+    {
+        return Storage::size($file_path);
+    }
+
+    // public function createPost(Request $request){
+    //     // $user = User::all();
+    //     $user = User::first();
+    //     $post = TemplePost::first();
+
+
+    //     $validator = Validator::make($request->all(), [
+    //         'filenames' => 'required|string',               
+    //         'path' => 'string|null',
+    //         'size' => 'required|string|min:2kb',
+    //         'type' => 'required|string',
+    //     ]);
 
         
-        if ($validator->fails()) {
-            return response()->json([
-                "error" => $validator->messages()
-            ]);
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             "error" => $validator->messages()
+    //         ]);
 
-        }
-        else
-        {
-            if($validator)
-            {
+    //     }
+    //     else
+    //     {
+    //         if($validator)
+    //         {
 
 
-                $post = Meta::create([
-                    'filenames' => $request->filenames,
-                    'path' => $request->path,
-                    'size' => $request->size,
-                    'type' => $request->type,
-                    'user_id' => $user->id,
-                    'temple_post_id' => $post->id,
-                ]);
+    //             $post = Meta::create([
+    //                 'filenames' => $request->filenames,
+    //                 'path' => $request->path,
+    //                 'size' => $request->size,
+    //                 'type' => $request->type,
+    //                 'user_id' => $user->id,
+    //                 'temple_post_id' => $post->id,
+    //             ]);
 
-                 if($post->save()){
+    //              if($post->save()){
 
-                return response()->json([
-                    "status" => true,
-                    "message" => "User has been posted successfully.",
-                    "data" => $post
-                ]);
-            } 
-            else{
-                return response()->json([
-                    "message" => "error"
-                ]);
-            }
+    //             return response()->json([
+    //                 "status" => true,
+    //                 "message" => "User has been posted successfully.",
+    //                 "data" => $post
+    //             ]);
+    //         } 
+    //         else{
+    //             return response()->json([
+    //                 "message" => "error"
+    //             ]);
+    //         }
 
  
-            }
-        }
-    }
+    //         }
+    //     }
+    // }
 
     
     // public function showDetail(Request $request){
